@@ -8,26 +8,26 @@ import (
 )
 
 type Server struct {
-	napping  napping.Session
-	URL      string
-	Username string
-	Password string
+	napping     napping.Session
+	URL         string
+	Username    string
+	Password    string
+	Debug       bool
+	InsecureTLS bool
 }
 
-func New(incigaUrl, username, password string) (*Server, error) {
+func New(s Server) (*Server, error) {
 	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: s.InsecureTLS},
 	}
 	client := &http.Client{Transport: transport}
 
-	sess := napping.Session{
-		Log:      true,
+	s.napping = napping.Session{
+		Log:      s.Debug,
 		Client:   client,
-		Userinfo: url.UserPassword(username, password),
+		Userinfo: url.UserPassword(s.Username, s.Password),
 	}
-
-	server := Server{URL: incigaUrl, Username: username, Password: password, napping: sess}
-	return &server, nil
+	return &s, nil
 }
 
 type Results struct {
