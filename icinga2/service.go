@@ -5,9 +5,11 @@ import (
 )
 
 type Service struct {
-	Name         string                 `json:"__name"`
+	Name         string                 `json:"__name,omitempty"`
 	HostName     string                 `json:"host_name"`
 	CheckCommand string                 `json:"check_command"`
+	Notes        string                 `json:"notes"`
+	NotesURL     string                 `json:"notes_url"`
 	Vars         map[string]interface{} `json:"vars"`
 }
 
@@ -18,7 +20,6 @@ type ServiceResults struct {
 }
 
 type ServiceCreate struct {
-	Templates []string `json:"templates"`
 	Attrs     Service  `json:"attrs"`
 }
 
@@ -35,7 +36,7 @@ func (s *Server) GetService(name string) (Service, error) {
 }
 
 func (s *Server) CreateService(service Service) error {
-	serviceCreate := ServiceCreate{Templates: []string{}, Attrs: service}
+	serviceCreate := ServiceCreate{Attrs: service}
 	var result Results
 	_, err := s.napping.Put(s.URL+"/v1/objects/services/"+service.HostName+"!"+service.Name, serviceCreate, &result, nil)
 	if err != nil {
@@ -62,5 +63,14 @@ func (s *Server) ListServices() (services []Service, err error) {
 
 func (s *Server) DeleteService(name string) (err error) {
 	_, err = s.napping.Delete(s.URL+"/v1/objects/services/"+name, &url.Values{"cascade": []string{"1"}}, nil, nil)
+	return
+}
+
+func (s *Server) UpdateService(service Service) (err error) {
+	serviceCopy := service
+	serviceCopy.Name = ""
+	serviceUpdate := ServiceCreate{Attrs: serviceCopy}
+	var result Results
+	_, err = s.napping.Post(s.URL+"/v1/objects/services/"+service.Name, serviceUpdate, &result, nil)
 	return
 }
