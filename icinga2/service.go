@@ -1,16 +1,19 @@
 package icinga2
 
 import (
+	//"fmt"
+	//"io"
+	//"io/ioutil"
 	"net/url"
 )
 
 type Service struct {
-	Name         string                 `json:"__name,omitempty"`
-	HostName     string                 `json:"host_name"`
-	CheckCommand string                 `json:"check_command"`
-	Notes        string                 `json:"notes"`
-	NotesURL     string                 `json:"notes_url"`
-	Vars         map[string]interface{} `json:"vars"`
+	Name         string `json:"__name,omitempty"`
+	HostName     string `json:"host_name"`
+	CheckCommand string `json:"check_command"`
+	Notes        string `json:"notes"`
+	NotesURL     string `json:"notes_url"`
+	Vars         Vars   `json:"vars"`
 }
 
 type ServiceResults struct {
@@ -20,10 +23,10 @@ type ServiceResults struct {
 }
 
 type ServiceCreate struct {
-	Attrs     Service  `json:"attrs"`
+	Attrs Service `json:"attrs"`
 }
 
-func (s *Server) GetService(name string) (Service, error) {
+func (s *WebClient) GetService(name string) (Service, error) {
 	var serviceResults ServiceResults
 	resp, err := s.napping.Get(s.URL+"/v1/objects/services/"+name, nil, &serviceResults, nil)
 	if err != nil {
@@ -35,18 +38,16 @@ func (s *Server) GetService(name string) (Service, error) {
 	return serviceResults.Results[0].Service, nil
 }
 
-func (s *Server) CreateService(service Service) error {
+func (s *WebClient) CreateService(service Service) error {
 	serviceCreate := ServiceCreate{Attrs: service}
-	var result Results
-	_, err := s.napping.Put(s.URL+"/v1/objects/services/"+service.HostName+"!"+service.Name, serviceCreate, &result, nil)
+	err := s.CreateObject("/services/"+service.Name, serviceCreate)
 	if err != nil {
 		panic(err)
 	}
-
 	return err
 }
 
-func (s *Server) ListServices() (services []Service, err error) {
+func (s *WebClient) ListServices() (services []Service, err error) {
 	var serviceResults ServiceResults
 	services = []Service{}
 
@@ -61,16 +62,48 @@ func (s *Server) ListServices() (services []Service, err error) {
 	return
 }
 
-func (s *Server) DeleteService(name string) (err error) {
+func (s *WebClient) DeleteService(name string) (err error) {
 	_, err = s.napping.Delete(s.URL+"/v1/objects/services/"+name, &url.Values{"cascade": []string{"1"}}, nil, nil)
 	return
 }
 
-func (s *Server) UpdateService(service Service) (err error) {
+func (s *WebClient) UpdateService(service Service) error {
 	serviceCopy := service
 	serviceCopy.Name = ""
 	serviceUpdate := ServiceCreate{Attrs: serviceCopy}
-	var result Results
-	_, err = s.napping.Post(s.URL+"/v1/objects/services/"+service.Name, serviceUpdate, &result, nil)
-	return
+
+	err := s.UpdateObject("/services/"+service.Name, serviceUpdate)
+	if err != nil {
+		panic(err)
+	}
+	return err
+}
+
+func (s *MockClient) GetService(name string) (Service, error) {
+	return s.Services[name], nil
+}
+
+func (s *MockClient) CreateService(service Service) error {
+	s.Services[service.Name] = service
+	return nil
+}
+
+func (s *MockClient) ListServices() ([]Service, error) {
+	services := []Service{}
+
+	for _, x := range s.Services {
+		services = append(services, x)
+	}
+
+	return services, nil
+}
+
+func (s *MockClient) DeleteService(name string) error {
+	delete(s.Services, name)
+	return nil
+}
+
+func (s *MockClient) UpdateService(service Service) error {
+	s.Services[service.Name] = service
+	return nil
 }
