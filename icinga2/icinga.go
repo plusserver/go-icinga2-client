@@ -58,6 +58,9 @@ func New(s WebClient) (*WebClient, error) {
 		Client:   client,
 		Userinfo: url.UserPassword(s.Username, s.Password),
 	}
+
+	s.URL = strings.TrimRight(s.URL, "/")
+
 	return &s, nil
 }
 
