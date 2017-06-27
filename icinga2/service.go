@@ -1,14 +1,11 @@
 package icinga2
 
 import (
-	//"fmt"
-	//"io"
-	//"io/ioutil"
 	"net/url"
 )
 
 type Service struct {
-	Name         string `json:"__name,omitempty"`
+	Name         string `json:"display_name"`
 	HostName     string `json:"host_name"`
 	CheckCommand string `json:"check_command"`
 	Notes        string `json:"notes"`
@@ -26,6 +23,10 @@ type ServiceCreate struct {
 	Attrs Service `json:"attrs"`
 }
 
+func (s *Service) fullName() string {
+	return s.HostName + "!" + s.Name
+}
+
 func (s *WebClient) GetService(name string) (Service, error) {
 	var serviceResults ServiceResults
 	resp, err := s.napping.Get(s.URL+"/v1/objects/services/"+name, nil, &serviceResults, nil)
@@ -40,7 +41,7 @@ func (s *WebClient) GetService(name string) (Service, error) {
 
 func (s *WebClient) CreateService(service Service) error {
 	serviceCreate := ServiceCreate{Attrs: service}
-	err := s.CreateObject("/services/"+service.Name, serviceCreate)
+	err := s.CreateObject("/services/"+service.fullName(), serviceCreate)
 	if err != nil {
 		panic(err)
 	}
@@ -68,11 +69,9 @@ func (s *WebClient) DeleteService(name string) (err error) {
 }
 
 func (s *WebClient) UpdateService(service Service) error {
-	serviceCopy := service
-	serviceCopy.Name = ""
-	serviceUpdate := ServiceCreate{Attrs: serviceCopy}
+	serviceUpdate := ServiceCreate{Attrs: service}
 
-	err := s.UpdateObject("/services/"+service.Name, serviceUpdate)
+	err := s.UpdateObject("/services/"+service.fullName(), serviceUpdate)
 	if err != nil {
 		panic(err)
 	}
@@ -84,7 +83,7 @@ func (s *MockClient) GetService(name string) (Service, error) {
 }
 
 func (s *MockClient) CreateService(service Service) error {
-	s.Services[service.Name] = service
+	s.Services[service.fullName()] = service
 	return nil
 }
 
@@ -104,6 +103,6 @@ func (s *MockClient) DeleteService(name string) error {
 }
 
 func (s *MockClient) UpdateService(service Service) error {
-	s.Services[service.Name] = service
+	s.Services[service.fullName()] = service
 	return nil
 }

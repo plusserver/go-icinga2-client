@@ -1,9 +1,8 @@
 package icinga2
 
 type HostGroup struct {
-	Name        string `json:"__name,omitempty"`
-	DisplayName string `json:"display_name"`
-	Vars        Vars   `json:"vars"`
+	Name string `json:"display_name,omitempty"`
+	Vars Vars   `json:"vars"`
 }
 
 type HostGroupResults struct {
@@ -59,9 +58,7 @@ func (s *WebClient) DeleteHostGroup(name string) (err error) {
 }
 
 func (s *WebClient) UpdateHostGroup(hostGroup HostGroup) error {
-	hostGroupCopy := hostGroup
-	hostGroupCopy.Name = ""
-	hostGroupUpdate := HostGroupCreate{Attrs: hostGroupCopy}
+	hostGroupUpdate := HostGroupCreate{Attrs: hostGroup}
 
 	err := s.UpdateObject("/hostgroups/"+hostGroup.Name, hostGroupUpdate)
 	if err != nil {

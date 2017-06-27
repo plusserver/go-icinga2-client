@@ -5,10 +5,9 @@ import (
 )
 
 type Host struct {
-	Name         string   `json:"__name,omitempty"`
+	Name         string   `json:"display_name"`
 	Address      string   `json:"address,omitempty"`
 	Address6     string   `json:"address6,omitempty"`
-	DisplayName  string   `json:"display_name"`
 	CheckCommand string   `json:"check_command,omitempty"`
 	Notes        string   `json:"notes"`
 	NotesURL     string   `json:"notes_url"`
@@ -69,10 +68,7 @@ func (s *WebClient) DeleteHost(name string) (err error) {
 }
 
 func (s *WebClient) UpdateHost(host Host) error {
-	hostCopy := host
-	hostCopy.Name = ""
-	hostCopy.Groups = []string{}
-	hostUpdate := HostCreate{Attrs: hostCopy}
+	hostUpdate := HostCreate{Attrs: host}
 	err := s.UpdateObject("/hosts/"+host.Name, hostUpdate)
 	if err != nil {
 		panic(err)

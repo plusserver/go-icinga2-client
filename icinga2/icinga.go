@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"gopkg.in/jmcvetta/napping.v3"
 )
@@ -79,42 +80,43 @@ type Results struct {
 }
 
 func (s *WebClient) CreateObject(path string, create interface{}) error {
-	var results Results
+	var results, errmsg Results
 
-	resp, err := s.napping.Put(s.URL+"/v1/objects"+path, create, &results, nil)
-	if err != nil {
-		return err
-	}
+	resp, err := s.napping.Put(s.URL+"/v1/objects"+path, create, &results, &errmsg)
 
-	return s.handleResults("create", path, resp, &results)
+	return s.handleResults("create", path, resp, &results, &errmsg, err)
 }
 
 func (s *WebClient) UpdateObject(path string, create interface{}) error {
-	var results Results
+	var results, errmsg Results
 
-	resp, err := s.napping.Post(s.URL+"/v1/objects"+path, create, &results, nil)
-	if err != nil {
-		return err
-	}
-
-	return s.handleResults("update", path, resp, &results)
+	resp, err := s.napping.Post(s.URL+"/v1/objects"+path, create, &results, &errmsg)
+	return s.handleResults("update", path, resp, &results, &errmsg, err)
 }
 
-func (s *WebClient) handleResults(typ, path string, resp *napping.Response, results *Results) error {
-	if resp.HttpResponse().StatusCode >= 400 {
-		return fmt.Errorf("%s %s : %s %+v\n", typ, path, resp.HttpResponse().Status)
-	}
-
-	if len(results.Results) <= 0 {
-		return nil
-	}
+func (s *WebClient) handleResults(typ, path string, resp *napping.Response, results, errmsg *Results, oerr error) error {
+	var resultReport string
 
 	for _, r := range results.Results {
 		if r.Code >= 400.0 {
-			return fmt.Errorf("%s %s : %s\n", typ, path, r.Status)
+			resultReport += r.Status + " " + strings.Join(r.Errors, " ") + " "
 		}
 	}
 
-	return nil
+	for _, r := range errmsg.Results {
+		if r.Code >= 400.0 {
+			resultReport += r.Status + " " + strings.Join(r.Errors, " ") + " "
+		}
+	}
+
+	if resp.HttpResponse().StatusCode >= 400 {
+		return fmt.Errorf("%s %s : %s - %s", typ, path, resp.HttpResponse().Status, resultReport)
+	}
+
+	if resultReport != "" {
+		return fmt.Errorf("%s %s : %s\n", typ, path, resultReport)
+	}
+
+	return oerr
 
 }
