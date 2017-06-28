@@ -1,6 +1,7 @@
 package icinga2
 
 import (
+	"fmt"
 	"net/url"
 )
 
@@ -33,7 +34,7 @@ func (s *WebClient) GetHost(name string) (Host, error) {
 		return Host{}, err
 	}
 	if resp.HttpResponse().StatusCode != 200 {
-		panic("Did not get 200 OK")
+		return Host{}, fmt.Errorf("Did not get 200 OK")
 	}
 	return hostResults.Results[0].Host, nil
 }
@@ -41,9 +42,6 @@ func (s *WebClient) GetHost(name string) (Host, error) {
 func (s *WebClient) CreateHost(host Host) error {
 	hostCreate := HostCreate{Templates: []string{"generic-host"}, Attrs: host}
 	err := s.CreateObject("/hosts/"+host.Name, hostCreate)
-	if err != nil {
-		panic(err)
-	}
 	return err
 }
 
@@ -70,9 +68,6 @@ func (s *WebClient) DeleteHost(name string) (err error) {
 func (s *WebClient) UpdateHost(host Host) error {
 	hostUpdate := HostCreate{Attrs: host}
 	err := s.UpdateObject("/hosts/"+host.Name, hostUpdate)
-	if err != nil {
-		panic(err)
-	}
 	return err
 }
 

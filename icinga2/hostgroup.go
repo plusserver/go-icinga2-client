@@ -1,5 +1,9 @@
 package icinga2
 
+import (
+	"fmt"
+)
+
 type HostGroup struct {
 	Name string `json:"display_name,omitempty"`
 	Vars Vars   `json:"vars"`
@@ -23,7 +27,7 @@ func (s *WebClient) GetHostGroup(name string) (HostGroup, error) {
 		return HostGroup{}, err
 	}
 	if resp.HttpResponse().StatusCode != 200 {
-		panic("Did not get 200 OK")
+		return HostGroup{}, fmt.Errorf("Did not get 200 OK")
 	}
 	return hostGroupResults.Results[0].HostGroup, nil
 }
@@ -31,9 +35,6 @@ func (s *WebClient) GetHostGroup(name string) (HostGroup, error) {
 func (s *WebClient) CreateHostGroup(hostGroup HostGroup) error {
 	hostGroupCreate := HostGroupCreate{Attrs: hostGroup}
 	err := s.CreateObject("/hostgroups/"+hostGroup.Name, hostGroupCreate)
-	if err != nil {
-		panic(err)
-	}
 	return err
 }
 
@@ -61,9 +62,6 @@ func (s *WebClient) UpdateHostGroup(hostGroup HostGroup) error {
 	hostGroupUpdate := HostGroupCreate{Attrs: hostGroup}
 
 	err := s.UpdateObject("/hostgroups/"+hostGroup.Name, hostGroupUpdate)
-	if err != nil {
-		panic(err)
-	}
 	return err
 }
 

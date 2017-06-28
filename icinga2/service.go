@@ -1,6 +1,7 @@
 package icinga2
 
 import (
+	"fmt"
 	"net/url"
 )
 
@@ -34,7 +35,7 @@ func (s *WebClient) GetService(name string) (Service, error) {
 		return Service{}, err
 	}
 	if resp.HttpResponse().StatusCode != 200 {
-		panic("Did not get 200 OK")
+		return Service{}, fmt.Errorf("Did not get 200 OK")
 	}
 	return serviceResults.Results[0].Service, nil
 }
@@ -42,9 +43,6 @@ func (s *WebClient) GetService(name string) (Service, error) {
 func (s *WebClient) CreateService(service Service) error {
 	serviceCreate := ServiceCreate{Attrs: service}
 	err := s.CreateObject("/services/"+service.fullName(), serviceCreate)
-	if err != nil {
-		panic(err)
-	}
 	return err
 }
 
@@ -72,9 +70,6 @@ func (s *WebClient) UpdateService(service Service) error {
 	serviceUpdate := ServiceCreate{Attrs: service}
 
 	err := s.UpdateObject("/services/"+service.fullName(), serviceUpdate)
-	if err != nil {
-		panic(err)
-	}
 	return err
 }
 
