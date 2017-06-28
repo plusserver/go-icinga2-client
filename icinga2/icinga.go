@@ -100,6 +100,10 @@ func (s *WebClient) UpdateObject(path string, create interface{}) error {
 func (s *WebClient) handleResults(typ, path string, resp *napping.Response, results, errmsg *Results, oerr error) error {
 	var resultReport string
 
+	if oerr != nil {
+		return oerr
+	}
+
 	for _, r := range results.Results {
 		if r.Code >= 400.0 {
 			resultReport += r.Status + " " + strings.Join(r.Errors, " ") + " "
