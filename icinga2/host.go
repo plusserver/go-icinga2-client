@@ -66,6 +66,7 @@ func (s *WebClient) DeleteHost(name string) (err error) {
 }
 
 func (s *WebClient) UpdateHost(host Host) error {
+	host.Groups = []string{} // must be empty when updating the Host
 	hostUpdate := HostCreate{Attrs: host}
 	err := s.UpdateObject("/hosts/"+host.Name, hostUpdate)
 	return err
