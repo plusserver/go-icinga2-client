@@ -12,6 +12,7 @@ type Service struct {
 	Notes        string `json:"notes"`
 	NotesURL     string `json:"notes_url"`
 	Vars         Vars   `json:"vars"`
+	Zone         string `json:"zone,omitempty"`
 }
 
 type ServiceResults struct {
@@ -55,7 +56,9 @@ func (s *WebClient) ListServices() (services []Service, err error) {
 		return
 	}
 	for _, result := range serviceResults.Results {
-		services = append(services, result.Service)
+		if s.Zone == "" || s.Zone == result.Service.Zone {
+			services = append(services, result.Service)
+		}
 	}
 
 	return

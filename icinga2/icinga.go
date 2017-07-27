@@ -37,6 +37,7 @@ type WebClient struct {
 	Password    string
 	Debug       bool
 	InsecureTLS bool
+	Zone        string
 }
 
 type MockClient struct {

@@ -14,6 +14,7 @@ type Host struct {
 	NotesURL     string   `json:"notes_url"`
 	Vars         Vars     `json:"vars"`
 	Groups       []string `json:"groups,omitempty"`
+	Zone         string   `json:"zone,omitempty"`
 }
 
 type HostResults struct {
@@ -54,7 +55,9 @@ func (s *WebClient) ListHosts() (hosts []Host, err error) {
 		return
 	}
 	for _, result := range hostResults.Results {
-		hosts = append(hosts, result.Host)
+		if s.Zone == "" || s.Zone == result.Host.Zone {
+			hosts = append(hosts, result.Host)
+		}
 	}
 
 	return

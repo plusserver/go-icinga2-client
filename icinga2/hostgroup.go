@@ -7,6 +7,7 @@ import (
 type HostGroup struct {
 	Name string `json:"display_name,omitempty"`
 	Vars Vars   `json:"vars"`
+	Zone string `json:"zone,omitempty"`
 }
 
 type HostGroupResults struct {
@@ -47,7 +48,9 @@ func (s *WebClient) ListHostGroups() (hostGroups []HostGroup, err error) {
 		return
 	}
 	for _, result := range hostGroupResults.Results {
-		hostGroups = append(hostGroups, result.HostGroup)
+		if s.Zone == "" || s.Zone == result.HostGroup.Zone {
+			hostGroups = append(hostGroups, result.HostGroup)
+		}
 	}
 
 	return
