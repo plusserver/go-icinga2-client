@@ -76,11 +76,17 @@ func (s *WebClient) UpdateHost(host Host) error {
 }
 
 func (s *MockClient) GetHost(name string) (Host, error) {
-	return s.Hosts[name], nil
+	if host, ok := s.Hosts[name]; ok {
+		return host, nil
+	} else {
+		return Host{}, fmt.Errorf("host not found")
+	}
 }
 
 func (s *MockClient) CreateHost(host Host) error {
+	s.mutex.Lock()
 	s.Hosts[host.Name] = host
+	s.mutex.Unlock()
 	return nil
 }
 
@@ -95,11 +101,15 @@ func (s *MockClient) ListHosts() ([]Host, error) {
 }
 
 func (s *MockClient) DeleteHost(name string) error {
+	s.mutex.Lock()
 	delete(s.Hosts, name)
+	s.mutex.Unlock()
 	return nil
 }
 
 func (s *MockClient) UpdateHost(host Host) error {
+	s.mutex.Lock()
 	s.Hosts[host.Name] = host
+	s.mutex.Unlock()
 	return nil
 }

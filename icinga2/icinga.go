@@ -3,11 +3,11 @@ package icinga2
 import (
 	"crypto/tls"
 	"fmt"
+	"gopkg.in/jmcvetta/napping.v3"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"gopkg.in/jmcvetta/napping.v3"
+	"sync"
 )
 
 type Client interface {
@@ -44,6 +44,7 @@ type MockClient struct {
 	Hostgroups map[string]HostGroup
 	Hosts      map[string]Host
 	Services   map[string]Service
+	mutex      sync.Mutex
 }
 
 type Vars map[string]interface{}
@@ -70,6 +71,7 @@ func NewMockClient() (c *MockClient) {
 	c.Hostgroups = make(map[string]HostGroup)
 	c.Hosts = make(map[string]Host)
 	c.Services = make(map[string]Service)
+	c.mutex = sync.Mutex{}
 	return
 }
 

@@ -25,7 +25,7 @@ type ServiceCreate struct {
 	Attrs Service `json:"attrs"`
 }
 
-func (s *Service) fullName() string {
+func (s *Service) FullName() string {
 	return s.HostName + "!" + s.Name
 }
 
@@ -43,7 +43,7 @@ func (s *WebClient) GetService(name string) (Service, error) {
 
 func (s *WebClient) CreateService(service Service) error {
 	serviceCreate := ServiceCreate{Attrs: service}
-	err := s.CreateObject("/services/"+service.fullName(), serviceCreate)
+	err := s.CreateObject("/services/"+service.FullName(), serviceCreate)
 	return err
 }
 
@@ -72,16 +72,22 @@ func (s *WebClient) DeleteService(name string) (err error) {
 func (s *WebClient) UpdateService(service Service) error {
 	serviceUpdate := ServiceCreate{Attrs: service}
 
-	err := s.UpdateObject("/services/"+service.fullName(), serviceUpdate)
+	err := s.UpdateObject("/services/"+service.FullName(), serviceUpdate)
 	return err
 }
 
 func (s *MockClient) GetService(name string) (Service, error) {
-	return s.Services[name], nil
+	if sv, ok := s.Services[name]; ok {
+		return sv, nil
+	} else {
+		return Service{}, fmt.Errorf("service not found")
+	}
 }
 
 func (s *MockClient) CreateService(service Service) error {
-	s.Services[service.fullName()] = service
+	s.mutex.Lock()
+	s.Services[service.FullName()] = service
+	s.mutex.Unlock()
 	return nil
 }
 
@@ -96,11 +102,15 @@ func (s *MockClient) ListServices() ([]Service, error) {
 }
 
 func (s *MockClient) DeleteService(name string) error {
+	s.mutex.Lock()
 	delete(s.Services, name)
+	s.mutex.Unlock()
 	return nil
 }
 
 func (s *MockClient) UpdateService(service Service) error {
-	s.Services[service.fullName()] = service
+	s.mutex.Lock()
+	s.Services[service.FullName()] = service
+	s.mutex.Unlock()
 	return nil
 }

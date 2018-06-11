@@ -69,11 +69,17 @@ func (s *WebClient) UpdateHostGroup(hostGroup HostGroup) error {
 }
 
 func (s *MockClient) GetHostGroup(name string) (HostGroup, error) {
-	return s.Hostgroups[name], nil
+	if hg, ok := s.Hostgroups[name]; ok {
+		return hg, nil
+	} else {
+		return HostGroup{}, fmt.Errorf("hostgroup not found")
+	}
 }
 
 func (s *MockClient) CreateHostGroup(hostGroup HostGroup) error {
+	s.mutex.Lock()
 	s.Hostgroups[hostGroup.Name] = hostGroup
+	s.mutex.Unlock()
 	return nil
 }
 
@@ -88,11 +94,15 @@ func (s *MockClient) ListHostGroups() ([]HostGroup, error) {
 }
 
 func (s *MockClient) DeleteHostGroup(name string) error {
+	s.mutex.Lock()
 	delete(s.Hostgroups, name)
+	s.mutex.Unlock()
 	return nil
 }
 
 func (s *MockClient) UpdateHostGroup(hostGroup HostGroup) error {
+	s.mutex.Lock()
 	s.Hostgroups[hostGroup.Name] = hostGroup
+	s.mutex.Unlock()
 	return nil
 }
