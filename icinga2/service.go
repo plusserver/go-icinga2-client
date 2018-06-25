@@ -25,6 +25,22 @@ type ServiceCreate struct {
 	Attrs Service `json:"attrs"`
 }
 
+func (s Service) GetCheckCommand() string {
+	return s.CheckCommand
+}
+
+func (s Service) GetVars() Vars {
+	return s.Vars
+}
+
+func (s Service) GetNotes() string {
+	return s.Notes
+}
+
+func (s Service) GetNotesURL() string {
+	return s.NotesURL
+}
+
 func (s *Service) FullName() string {
 	return s.HostName + "!" + s.Name
 }

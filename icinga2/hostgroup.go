@@ -21,6 +21,10 @@ type HostGroupCreate struct {
 	Attrs     HostGroup `json:"attrs"`
 }
 
+func (hg HostGroup) GetVars() Vars {
+	return hg.Vars
+}
+
 func (s *WebClient) GetHostGroup(name string) (HostGroup, error) {
 	var hostGroupResults HostGroupResults
 	resp, err := s.napping.Get(s.URL+"/v1/objects/hostgroups/"+name, nil, &hostGroupResults, nil)

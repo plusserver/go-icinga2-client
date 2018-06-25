@@ -49,6 +49,17 @@ type MockClient struct {
 
 type Vars map[string]interface{}
 
+type Checkable interface {
+	GetCheckCommand() string
+	GetVars() Vars
+	GetNotes() string
+	GetNotesURL() string
+}
+
+type Object interface {
+	GetVars() Vars
+}
+
 func New(s WebClient) (*WebClient, error) {
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: s.InsecureTLS},

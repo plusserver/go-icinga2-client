@@ -28,6 +28,22 @@ type HostCreate struct {
 	Attrs     Host     `json:"attrs"`
 }
 
+func (h Host) GetCheckCommand() string {
+	return h.CheckCommand
+}
+
+func (h Host) GetVars() Vars {
+	return h.Vars
+}
+
+func (h Host) GetNotes() string {
+	return h.Notes
+}
+
+func (h Host) GetNotesURL() string {
+	return h.NotesURL
+}
+
 func (s *WebClient) GetHost(name string) (Host, error) {
 	var hostResults HostResults
 	resp, err := s.napping.Get(s.URL+"/v1/objects/hosts/"+name, nil, &hostResults, nil)
