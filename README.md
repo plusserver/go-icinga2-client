@@ -7,7 +7,7 @@ Icinga2 API client.
 ```
 import "github.com/Nexinto/go-icinga2-client/icinga2"
 
-icinga, err := icinga2.New(icinga2.Server{
+icinga, err := icinga2.New(icinga2.WebClient{
 		URL:         "https://icinga.somewhere.com:5665,
 		Username:    "icinga",
 		Password:    "secret",
