@@ -51,10 +51,18 @@ func (s *WebClient) GetService(name string) (Service, error) {
 	if err != nil {
 		return Service{}, err
 	}
-	if resp.HttpResponse().StatusCode != 200 {
-		return Service{}, fmt.Errorf("Did not get 200 OK")
+
+	switch resp.HttpResponse().StatusCode {
+	case 404:
+		return Service{}, ErrNotFound
+	case 403:
+		return Service{}, ErrForbidden
+	case 401:
+		return Service{}, ErrUnauthorized
+	case 200:
+		return serviceResults.Results[0].Service, nil
 	}
-	return serviceResults.Results[0].Service, nil
+	return Service{}, fmt.Errorf("Got http error: %d: %w", resp.HttpResponse().StatusCodem, ErrUnknown)
 }
 
 func (s *WebClient) CreateService(service Service) error {
