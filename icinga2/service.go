@@ -62,7 +62,7 @@ func (s *WebClient) GetService(name string) (Service, error) {
 	case 200:
 		return serviceResults.Results[0].Service, nil
 	}
-	return Service{}, fmt.Errorf("Got http error: %d: %w", resp.HttpResponse().StatusCodem, ErrUnknown)
+	return Service{}, fmt.Errorf("Got http error: %d: %w", resp.HttpResponse().StatusCode, ErrUnknown)
 }
 
 func (s *WebClient) CreateService(service Service) error {
